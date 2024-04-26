@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: legocarla
+  labels:
+    app: carla
+spec:
+  hostNetwork: true
+  containers:
+    - image: jiapengzhao/lego_carla_server:CMDtest
+      name: carla-server
+      # command: [/bin/bash] 
+      # args: ["-c", "nvidia-smi"]
+      stdin: true
+      tty: true
+      # ports:
+      #   - containerPort: 80
+      #     containerPort: 2000
+      #     containerPort: 2001
+      #     containerPort: 2002
+      #     containerPort: 7777
+      env:
+        - name: DISPLAY
+          value: :0
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: all
+        - name: QT_X11_NO_MITSHM
+          value: "1"
+        - name: SDL_VIDEODRIVER
+          value: x11
+        - name: NVIDIA_DRIVER_CAPABILITIES
+          value: compute, graphics, utility
+      securityContext:
+        privileged: true
+        allowPrivilegeEscalation: true
+      resources:
+        limits:
+          nvidia.com/gpu: 1

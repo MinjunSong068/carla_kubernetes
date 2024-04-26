@@ -1,0 +1,112 @@
+apiVersion: apps/v1 #copied from NRP
+kind: Deployment
+metadata:
+  name: carla
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: carla
+  template:
+    metadata:
+      labels:
+        k8s-app: carla
+    spec:
+      containers:
+      - name: carla-server
+        image: jiapengzhao/lego_carla_server:ogRepo
+        stdin: true
+        tty: true
+        env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: all
+        - name: QT_X11_NO_MITSHM
+          value: "1"
+        - name: SDL_VIDEODRIVER
+          value: "offscreen"
+        - name: NVIDIA_DRIVER_CAPABILITIES
+          value: compute, graphics, utility
+        securityContext:
+        #  runAsUser: 0
+         privileged: true
+         capabilities:
+           add: ["SYS_RAWIO"]
+        resources:
+          limits:
+            memory: "64Gi"
+            cpu: "9"
+            nvidia.com/gpu: 1
+          requests:
+            memory: "32Gi"
+            cpu: "6"
+        command: ["/bin/bash"]
+        # args: ["/home/CARLA_0.9.15/CarlaUE4.sh -carla-world-port=2000 -RenderOffScreen"]
+        volumeMounts:
+        - name: x-auth
+          mountPath: /root/.Xauthority
+        - name: x11-socket
+          mountPath: /tmp/.X11-unix
+        # - name: group
+        #   mountPath: /etc/group
+        #   readOnly: true
+        # - name: passwd
+        #   mountPath: /etc/passwd
+        #   readOnly: true
+        # - name: shadow
+        #   mountPath: /etc/shadow
+        #   readOnly: true
+        # - name: sudoers
+        #   mountPath: /etc/sudoers
+        #   readOnly: true
+        # - name: sudoers-d
+        #   mountPath: /etc/sudoers.d
+        #   readOnly: true
+        # - name: home
+        #   mountPath: /home/lego_carla
+      volumes:
+      - name: x-auth
+        hostPath:
+          path: /home/mjsong04/.Xauthority
+      - name: x11-socket
+        hostPath:
+          path: /tmp/.X11-unix
+      # - name: group
+      #   hostPath:
+      #     path: /etc/group
+      # - name: passwd
+      #   hostPath:
+      #     path: /etc/passwd
+      # - name: shadow
+      #   hostPath:
+      #     path: /etc/shadow
+      # - name: sudoers
+      #   hostPath:
+      #     path: /etc/sudoers
+      # - name: sudoers-d
+      #   hostPath:
+      #     path: /etc/sudoers.d
+      # - name: home
+      #   hostPath:
+      #     path: /home/mjsong04
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: carla
+  namespace: default
+  labels:
+    k8s-app: carla
+spec:
+  selector:
+    k8s-app: carla
+  ports:
+  - name: carla2000 #default carla world port
+    protocol: TCP
+    port: 2000
+  - name: carla2001 #measurements port (world port + 1)
+    protocol: TCP
+    port: 2001
+  - name: carla2002 #control port (world port + 2)
+    protocol: TCP
+    port: 2002

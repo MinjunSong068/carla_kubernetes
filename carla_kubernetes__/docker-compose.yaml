@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  legocarla:
+    image: jiapengzhao/lego_carla_server:ogRepo
+    container_name: carla_server
+    ports:
+      - "2000-2002:2000-2002" #2000 is used for server port, 2002 is exposed for pythonAPI
+    command: ["/bin/bash", "/home/CARLA_0.9.15/CarlaUE4.sh", "-nosound"]
+    environment:
+      - DISPLAY=${DISPLAY}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute, graphics, utility
+      - QT_X11_NO_MITSHM=1
+      - SDL_VIDEODRIVER=x11
+      - DEBIAN_FRONTEND=noninteractive
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    privileged: true
+    network_mode: "host"
+    stdin_open: true
+    tty: true

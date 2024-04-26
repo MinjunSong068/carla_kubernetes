@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.0 (40646f47)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: legocarla
+  name: legocarla
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: legocarla
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.0 (40646f47)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: legocarla
+    spec:
+      volumes:
+        - name: x11-socket
+          hostPath:
+            path: /tmp/.X11-unix
+      hostNetwork: true
+      containers:
+        - command:
+            - /bin/bash
+          # args:
+          #   - /home/CARLA_0.9.15/CarlaUE4.sh
+          #   - -RenderOffScreen
+          volumeMounts:
+            - name: x11-socket
+              mountPath: /tmp/.X11-unix
+          livenessProbe:
+            exec:
+              command:
+              - /bin/bash
+              # - /home/CARLA_0.9.15/CarlaUE4.sh
+            initialDelaySeconds: 8
+            periodSeconds: 30
+          env:
+            - name: DEBIAN_FRONTEND
+              value: noninteractive
+            - name: DISPLAY
+              value: ${DISPLAY}
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: compute, graphics, utility
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: all
+            - name: QT_X11_NO_MITSHM
+              value: "1"
+            - name: RMW_IMPLEMENTATION
+              value: rmw_cyclonedds_cpp
+            - name: SDL_VIDEODRIVER
+              value: x11
+          image: jiapengzhao/lego_carla_server:ogRepo
+          name: carla-server
+          # ports:
+          #   # - name: carla2000
+          #   #   protocol: TCP
+          #   #   port: 2000
+          #   # - name: carla2001
+          #   #   protocol: TCP
+          #   #   port: 2001
+          #   # - name: carla2002
+          #   #   protocol: TCP
+          #   #   port: 2002
+          #   - containerPort: 2000
+          #   - containerPort: 2001
+          #   - containerPort: 2002
+          resources: 
+            limits:
+              nvidia.com/gpu: 1
+              cpu: "12"
+              memory: "80Gi"
+            requests:
+              nvidia.com/gpu: 1
+              memory: "32Gi"
+              cpu: "10"
+          securityContext:
+            privileged: true
+          stdin: true
+          tty: true
+      restartPolicy: Always
+status: {}

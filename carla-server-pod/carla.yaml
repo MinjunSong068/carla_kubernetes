@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: carla-server
-        image: jiapengzhao/lego_carla_server:ogRepo
+        image: lego_carla/kubernetes:v1
         stdin: true
         tty: true
         env:
@@ -41,7 +41,7 @@ spec:
             memory: "32Gi"
             cpu: "6"
         command: ["/bin/bash"]
-        # args: ["/home/CARLA_0.9.15/CarlaUE4.sh -carla-world-port=2000 -RenderOffScreen"]
+        # args: ["/home/CARLA_0.9.15/CarlaUE4.sh -carla-world-port=2000 -RenderOffScreen"] //run x-server in same docker image
         volumeMounts:
         - name: x-auth
           mountPath: /root/.Xauthority

@@ -15,10 +15,13 @@ spec:
     spec:
       containers:
       - name: carla-server
-        image: lego_carla/kubernetes:v1
+        image: lego_carla/kubernetes:v2
+        # args: ["/home/CARLA_0.9.15/CarlaUE4.sh -carla-world-port=2000 -RenderOffScreen"] ##run x-server in same docker image
         stdin: true
         tty: true
         env:
+        - name: DISPLAY
+          value: "localhost:1.0"
         - name: NVIDIA_VISIBLE_DEVICES
           value: all
         - name: QT_X11_NO_MITSHM
@@ -41,12 +44,21 @@ spec:
             memory: "32Gi"
             cpu: "6"
         command: ["/bin/bash"]
-        # args: ["/home/CARLA_0.9.15/CarlaUE4.sh -carla-world-port=2000 -RenderOffScreen"] //run x-server in same docker image
-        volumeMounts:
-        - name: x-auth
-          mountPath: /root/.Xauthority
-        - name: x11-socket
-          mountPath: /tmp/.X11-unix
+      - name: xvfb
+        image: comiq/xvfb:latest
+        env:
+        - name: DISPLAY
+          value: "1"
+        - name: SCREEN
+          value: "0"
+        ports:
+        - name: xserver
+          containerPort: 6001
+        # volumeMounts:
+        # - name: x-auth
+        #   mountPath: /root/.Xauthority
+        # - name: x11-socket
+        #   mountPath: /tmp/.X11-unix
         # - name: group
         #   mountPath: /etc/group
         #   readOnly: true
@@ -64,13 +76,13 @@ spec:
         #   readOnly: true
         # - name: home
         #   mountPath: /home/lego_carla
-      volumes:
-      - name: x-auth
-        hostPath:
-          path: /home/mjsong04/.Xauthority
-      - name: x11-socket
-        hostPath:
-          path: /tmp/.X11-unix
+      # volumes:
+      # - name: x-auth
+      #   hostPath:
+      #     path: /home/mjsong04/.Xauthority
+      # - name: x11-socket
+      #   hostPath:
+      #     path: /tmp/.X11-unix
       # - name: group
       #   hostPath:
       #     path: /etc/group
